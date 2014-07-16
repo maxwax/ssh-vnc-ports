@@ -1,0 +1,68 @@
+#!/bin/bash
+
+set -x
+
+VERSION="2014.0716.01"
+
+# Set the default base prefix to 79
+BASE_PREFIX="79"
+
+# Set the first parameter as a target
+TARGET=${1:-"null"}
+
+function usage {
+	echo "ssh-vnc $VERSION"
+	echo
+	echo "Syntax: ssh-vnc <target-system>"
+	echo
+}
+
+# Process command line arguments
+while [ "$1" != "" ] 
+do
+  case $1 in
+
+    # Default, output limited to < 80 characters wide
+    -b | "--base" )
+      shift
+      BASE_PREFIX=$1;;
+
+    # I don't know what I want! Help me!
+    -h | --help | --syntax) 
+      usage
+      exit 0;;
+
+    # Last parameter without a dash is our target, we hope.
+    *)
+			# THIS parameter is our target, set it
+      TARGET=$1
+			# Now shift so we run out of parameters and exit loop soon after
+			shift;;
+
+  esac 
+done 
+
+
+# Check to see if the target is empty and handle it
+if [[ $TARGET == "null" ]]
+then
+	usage
+	exit 1
+fi
+
+echo "Port forwaring remote ports 5900..5909 to ${BASE_PREFIX}00..${BASE_PREFIX}09"
+
+# SSH to the target system
+# Suggested: -L 7901:localhost:5901 so other ad-hoc cases can use 5901
+ssh \
+	-L ${BASE_PREFIX}00:localhost:5900 \
+	-L ${BASE_PREFIX}01:localhost:5901 \
+	-L ${BASE_PREFIX}02:localhost:5902 \
+	-L ${BASE_PREFIX}03:localhost:5903 \
+	-L ${BASE_PREFIX}04:localhost:5904 \
+	-L ${BASE_PREFIX}05:localhost:5905 \
+	-L ${BASE_PREFIX}06:localhost:5906 \
+	-L ${BASE_PREFIX}07:localhost:5907 \
+	-L ${BASE_PREFIX}08:localhost:5908 \
+	-L ${BASE_PREFIX}09:localhost:5909 \
+	"$TARGET"
